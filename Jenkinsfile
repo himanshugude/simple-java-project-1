@@ -2,21 +2,19 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk'                 // Must match Jenkins Global Tool name
-        maven 'Maven-3.9.10'      // Must match Jenkins Global Tool name
+        jdk 'jdk' // This name must match the JDK name set in Jenkins > Global Tool Configuration
+        maven 'Maven-3.9.10' // Same here for Maven
     }
 
     environment {
         GIT_REPO = 'https://github.com/himanshugude/simple-java-project-1.git'
-        MAVEN_HOME = tool 'Maven-3.9.10'
-        JAVA_HOME = tool 'jdk'
-        PATH = "${env.PATH};${MAVEN_HOME}\\bin;${JAVA_HOME}\\bin"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                // You don't need to specify Git repo here if you're using "Pipeline from SCM"
+                echo "Code already checked out by Jenkins SCM config"
             }
         }
 
@@ -25,14 +23,23 @@ pipeline {
                 bat 'mvn clean install'
             }
         }
+
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+        }
     }
 
     post {
+        always {
+            echo 'Pipeline completed.'
+        }
         success {
-            echo '✅ Build completed successfully!'
+            echo 'Build succeeded!'
         }
         failure {
-            echo '❌ Build failed.'
+            echo 'Build failed.'
         }
     }
 }
